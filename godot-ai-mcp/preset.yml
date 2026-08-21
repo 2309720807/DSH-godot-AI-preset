@@ -1,0 +1,2 @@
+name: Godot AI MCP
+description: 基于 PTC 模式（标准模式全部能力 + Code Mode SDK），并内置 Godot AI MCP 桥接：连接 Godot 编辑器的 MCP 服务器（默认 http://127.0.0.1:8000/mcp），提供 godot_mcp_status / godot_mcp_tools / godot_mcp_call / godot_mcp_configure / godot_mcp_direct_mode 工具，可直接查看场景、节点与脚本，并驱动 Godot 编辑器。系统提示内置全部 45 个 Godot AI MCP 工具及其调用接口速查（自动注入，无需先查工具列表即可调用）。聊天输入框下方提供“MCP 直连”开关（默认开启）：开启时 DSH 强制直连 MCP 插件进行游戏编辑，关闭时按需调用。

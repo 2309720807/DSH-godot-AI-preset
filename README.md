@@ -11,7 +11,7 @@ DSH Godot AI MCP/
     ├── agent.cordis.yml           ← 预设组合（基于 PTC 模式 + Godot MCP 桥接行）
     ├── preset.yml                 ← 显示名与描述（设置里显示为 "Godot AI MCP"）
     └── plugin/
-        └── godot-mcp-bridge.mjs   ← 桥接插件（MCP Streamable HTTP 客户端 + 直连模式 + Web 开关，自包含）
+        └── godot-mcp-bridge.mjs   ← 桥接插件（MCP Streamable HTTP 客户端 + 直连模式 + Web 开关 + 内置 45 工具速查，自包含）
 ```
 
 ## 在新电脑上安装
@@ -42,6 +42,30 @@ DSH Godot AI MCP/
    | `godot_mcp_configure` | 服务器不在默认端口时切换端点 URL |
    | `godot_mcp_direct_mode` | 读取/修改“MCP 直连”模式（与输入框下方的开关同步） |
 
+## 内置 45 工具速查（系统提示自动注入）
+
+桥接插件把 Godot AI MCP 服务器的**全部 45 个工具及调用接口**以精简速查表
+内置（`TOOLS_CATALOG_TEXT` 常量），并在每步模型请求前注入系统提示。每个工具
+都包含：
+
+- **什么时候用** —— 一行中文用途说明；
+- **怎么调用** —— 参数名、类型、必填/默认值、关键枚举值；`*_manage` 汇总
+  工具列出全部 `op` 取值与操作签名。
+
+速查表顶部还有通用约定：统一走 `godot_mcp_call({tool, args})` 调用、
+`session_id` 格式（`<project-slug>@<4hex>`，如 `wenming@4bef`，须完整 4 位
+hex）、`{op, params}` 调用形状、节点路径（相对当前编辑场景，如 `/Main/Camera3D`）
+与资源路径（`res://`）约定等。
+
+要点：
+
+- **两种直连模式下都会注入**：直连开启时 agent 立即主动调用；关闭时 agent
+  也能按需直接调用，无需先查工具列表。
+- 与**工作目录无关**：预设从固定路径加载，桥接行按组合文件自身目录解析，
+  在任何目录新建 `Godot AI MCP` 会话都生效。
+- 速查表基于导出时的服务器版本（v3.4.7 · 45 工具）；若 addon 升级导致工具
+  变化，以 `godot_mcp_tools` 的实时结果为准。
+
 ## “MCP 直连”开关
 
 使用该预设的会话在 **聊天输入框下方** 会显示一个 **“MCP 直连”** 开关：
@@ -65,6 +89,11 @@ DSH Godot AI MCP/
 - 该预设基于 PTC 模式（标准模式全部能力 + Code Mode SDK）复制而来。
 - 桥接插件完全自包含在 `plugin/godot-mcp-bridge.mjs`，使用 Node 内置 `fetch`，
   不依赖任何外部程序；DSH 自身运行于 Node 18+，无需额外环境。
+- 内置的 45 工具速查表（精简版，约 13.8 KB）随桥接插件注入系统提示，两种直连
+  模式均生效。如需修改目录内容：编辑 `godot-tools-compact.txt` 后运行
+  `apply-compact-catalog.mjs` 即可重新生成并同步两处预设（这两个辅助脚本位于
+  导出工作区 `F:\software\Godot agent\`，不随本备份包分发；完整 schema 抓取
+  与自动生成脚本为 `fetch-godot-tools.mjs` / `gen-godot-catalog.mjs`）。
 - “MCP 直连”UI 依赖宿主的 `dynamicCordisRunner` 服务（`dsh web` 部署自带）；
   纯无头（headless）部署下桥接自动跳过 UI，直连模式仍默认开启并可用
   `godot_mcp_direct_mode` 工具切换。
@@ -82,4 +111,6 @@ DSH Godot AI MCP/
   整体复制部署目录即可自带），或改用构建版 DSH（不跑源码）则完全不受影响。
 - 导出时间：2026-08-20（预设 ID：`godot-ai-mcp`，来源机器用户根目录副本，
   文件与源逐一 SHA256 比对一致）。v2 更新于 2026-08-21：新增“MCP 直连”开关
-  与 `godot_mcp_direct_mode` 工具，默认直连。
+  与 `godot_mcp_direct_mode` 工具，默认直连。v3 更新于 2026-08-21：内置全部
+  45 个 Godot AI MCP 工具速查（精简版：用途 + 调用接口），两种直连模式均
+  自动注入；备份内三个预设文件与源逐一 SHA256 比对一致。
